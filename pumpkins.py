@@ -48,3 +48,43 @@ def harvest_pumpkins():
     for i in range(5):
         # 5 because the decay rate is 20% so 5 passes should usually clear all bad pumpkinks to maximise harvest
         clear_bad_pumpkins()
+
+def harvest_pumpkin_columns():
+    columns_per_drone = get_world_size() / max_drones()
+    start_x = get_pos_x()
+    for x in range(columns_per_drone):
+        for y in range(get_world_size()):
+            till_and_plant()
+            move(North)
+        move(East)
+    
+    helpers.move_to_coords(start_x, 0)
+    for i in range(5):
+        # 5 because the decay rate is 20% so 5 passes should usually clear all bad pumpkinks to maximise harvest
+        clear_bad_pumpkin_columns()
+    
+
+def clear_bad_pumpkin_columns():
+    columns_per_drone = get_world_size() / max_drones()
+    for x in range(columns_per_drone):
+        for y in range(get_world_size()):
+            if get_entity_type() == Entities.Dead_Pumpkin:
+                # Planting a new plant in its place automatically removes the dead pumpkin, so there is no need to harvest it. 
+                plant(Entities.Pumpkin)
+            move(North)
+        move(East)
+
+def spawn_drones():
+    world_size = get_world_size()
+    
+    columns_per_drone = world_size / max_drones()
+    
+    i = 0
+    while i < world_size:
+        helpers.move_to_coords(i,0)
+        spawn_drone(harvest_pumpkin_columns)
+        i += columns_per_drone
+    
+def harvest_pumpkins_with_multiple_drones():
+    spawn_drones()
+    harvest_pumpkin_columns()
