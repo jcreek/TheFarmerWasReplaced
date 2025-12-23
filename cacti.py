@@ -44,50 +44,99 @@ import helpers
 # 4 9 7
 # 3 3 2
 
-def till_and_plant(cacti):
+local_cacti = {}
+
+COLUMNS_PER_DRONE = 1
+
+
+def till_and_plant():
     if get_ground_type() != Grounds.Soil:
         till()
     helpers.harvest_if_possible()
     plant(Entities.Cactus)
-    cacti[(get_pos_x(), get_pos_y())] = measure()
 
-def sort_cacti(cacti):
-    swaps_made = True
+def sort_local_region(start_x, end_x):
     world_size = get_world_size()
-    
-    while swaps_made:
-        number_of_swaps_made_this_loop = 0
-        # Go through the cacti array, each entry stores the size at the x,y
-        for x in range(world_size):
-            for y in range(world_size):
-                # Check the cactus to the right
-                if x+1 < world_size and cacti[(x,y)] > cacti[(x+1,y)]:
-                    helpers.move_to_coords(x,y)
-                    swap(East)
-                    temp_cactus = cacti[(x,y)]
-                    cacti[(x,y)] = cacti[(x+1,y)]
-                    cacti[(x+1,y)] = temp_cactus
-                    number_of_swaps_made_this_loop += 1
-                
-                # Check the cactus above
-                if y+1 < world_size and cacti[(x,y)] > cacti[(x,y+1)]:
-                    helpers.move_to_coords(x,y)
-                    swap(North)
-                    temp_cactus = cacti[(x,y)]
-                    cacti[(x,y)] = cacti[(x,y+1)]
-                    cacti[(x,y+1)] = temp_cactus
-                    number_of_swaps_made_this_loop += 1
-        
-        if number_of_swaps_made_this_loop == 0:
-            swaps_made = False
+    swaps_made = True
 
-def harvest_cacti(cacti):
-    for x in range(get_world_size()):
-        for y in range(get_world_size()):
-            till_and_plant(cacti)
+    while swaps_made:
+        swaps_made = False
+
+        for x in range(start_x, end_x):
+            helpers.move_to_coords(x, 0)
+
+            for y in range(world_size):
+
+                current = measure()
+                
+                # Compare left
+                if x - 1 > 0:
+                    left = measure(West)
+
+                    # Only compare fully-grown cacti
+                    if current != None and left != None:
+                        if current < left:
+                            swap(West)
+                            swaps_made = True
+                            current = measure()  # refresh after swap
+
+                # Compare right
+                if x + 1 < world_size:
+                    right = measure(East)
+
+                    # Only compare fully-grown cacti
+                    if current != None and right != None:
+                        if current > right:
+                            swap(East)
+                            swaps_made = True
+                            current = measure()  # refresh after swap
+
+                # Compare up
+                if y + 1 < world_size:
+                    up = measure(North)
+
+                    if current != None and up != None:
+                        if current > up:
+                            swap(North)
+                            swaps_made = True
+
+                move(North)
+
+
+def harvest_cacti_columns():
+    world_size = get_world_size()
+    start_x = get_pos_x()
+    end_x = min(start_x + COLUMNS_PER_DRONE, world_size)
+
+    if start_x >= world_size:
+        return
+
+    # Plant owned columns
+    for x in range(start_x, end_x):
+        helpers.move_to_coords(x, 0)
+        for _ in range(world_size):
+            till_and_plant()
             move(North)
-        move(East)
+    sort_local_region(start_x, end_x)
+
+def spawn_drones():
+    global COLUMNS_PER_DRONE
+
+    world_size = get_world_size()
+    drones = max_drones()
+
+    COLUMNS_PER_DRONE = world_size // drones
+    if COLUMNS_PER_DRONE < 1:
+        COLUMNS_PER_DRONE = 1
+
+    start_x = 0
+    while start_x < world_size:
+        helpers.move_to_coords(start_x, 0)
+        spawn_drone(harvest_cacti_columns)
+        start_x += COLUMNS_PER_DRONE
+
+    # Also run in main drone
+    harvest_cacti_columns()
     
-    sort_cacti(cacti)
-    
+    # Finally harvest one cactus to trigger a full harvest
     helpers.harvest_if_possible()
