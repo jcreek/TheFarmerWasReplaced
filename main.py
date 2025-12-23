@@ -32,7 +32,7 @@ clear()
 while True:
     run_loop(num_loops, 'hay', hay.harvest_hay_with_multiple_drones)
     run_loop(num_loops, 'wood', wood.harvest_wood)
-    run_loop(num_loops * 20, 'carrots', carrots.harvest_carrots)
+    run_loop(num_loops * 20, 'carrots', carrots.harvest_carrots_with_multiple_drones)
     run_loop(num_loops, 'pumpkins', pumpkins.harvest_pumpkins)
     sunflowers.initial_planting_performed = False
     run_loop(num_loops * 50, 'sunflowers', harvest_sunflowers_wrapper)
