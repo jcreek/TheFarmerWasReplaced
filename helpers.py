@@ -36,3 +36,13 @@ def move_to_coords(x, y):
             move(North)
         else:
             move(South)
+
+def get_coords_from_direction(direction):
+    if direction == North:
+        return (get_pos_x(), get_pos_y()+1)
+    elif direction == South:
+        return (get_pos_x(), get_pos_y()-1)
+    elif direction == East:
+        return (get_pos_x()+1, get_pos_y())
+    elif direction == West:
+        return (get_pos_x()-1, get_pos_y())

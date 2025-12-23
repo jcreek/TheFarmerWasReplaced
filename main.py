@@ -4,6 +4,7 @@ import carrots
 import pumpkins
 import sunflowers
 import cacti
+import mazes
 
 sunflowers_array = {} # sunflowers_array[(x, y)] = petals
 cactus_array = {} # cactus_array[(x, y)] = size
@@ -36,3 +37,4 @@ while True:
     sunflowers.initial_planting_performed = False
     run_loop(num_loops * 50, 'sunflowers', harvest_sunflowers_wrapper)
     run_loop(1, 'cacti', harvest_cacti_wrapper)
+    run_loop(1, "maze", mazes.navigate_maze)
