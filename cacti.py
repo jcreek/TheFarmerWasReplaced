@@ -52,10 +52,9 @@ COLUMNS_PER_DRONE = 1
 def till_and_plant():
     if get_ground_type() != Grounds.Soil:
         till()
-    helpers.harvest_if_possible()
     plant(Entities.Cactus)
 
-def sort_local_region(start_x, end_x):
+def sort_local_region(start_x, end_x, final_drone = False):
     world_size = get_world_size()
     swaps_made = True
 
@@ -77,6 +76,8 @@ def sort_local_region(start_x, end_x):
                     if current != None and left != None:
                         if current < left:
                             swap(West)
+                            if final_drone:
+                                return True
                             swaps_made = True
                             current = measure()  # refresh after swap
 
@@ -88,6 +89,8 @@ def sort_local_region(start_x, end_x):
                     if current != None and right != None:
                         if current > right:
                             swap(East)
+                            if final_drone:
+                                return True
                             swaps_made = True
                             current = measure()  # refresh after swap
 
@@ -98,9 +101,12 @@ def sort_local_region(start_x, end_x):
                     if current != None and up != None:
                         if current > up:
                             swap(North)
+                            if final_drone:
+                                return True
                             swaps_made = True
 
                 move(North)
+    return False
 
 
 def harvest_cacti_columns():
@@ -118,10 +124,23 @@ def harvest_cacti_columns():
             till_and_plant()
             move(North)
     sort_local_region(start_x, end_x)
+    
+def confirm_sorting_and_harvest():
+    not_sorted = True
+    world_size = get_world_size()
+    
+    while not_sorted:
+        # traverse the grid and if there's any swaps needed then restart traversal
+        not_sorted = sort_local_region(0, world_size, True)
+        if num_drones() == 1:
+            spawn_drones()
+        
+    # if there are no swaps needed then harvest
+    helpers.harvest_if_possible()
 
 def spawn_drones():
     global COLUMNS_PER_DRONE
-
+    
     world_size = get_world_size()
     drones = max_drones()
 
@@ -135,8 +154,12 @@ def spawn_drones():
         spawn_drone(harvest_cacti_columns)
         start_x += COLUMNS_PER_DRONE
 
+def harvest_cacti_with_multiple_drones():
+    spawn_drones()
+
     # Also run in main drone
     harvest_cacti_columns()
     
-    # Finally harvest one cactus to trigger a full harvest
-    helpers.harvest_if_possible()
+    # Finally the master drone can wait for sorting to be complete 
+    # then harvest one cactus to trigger a full harvest
+    confirm_sorting_and_harvest()
