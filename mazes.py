@@ -83,6 +83,16 @@ direction_index = 0
 
 treasure_not_yet_found = True
 
+def reset_state():
+    global visited_cells
+    global path_back
+    global direction_index
+    global treasure_not_yet_found
+    
+    visited_cells = {}
+    path_back = []
+    direction_index = 0
+    treasure_not_yet_found = True
 
 def record_current_cell_visited():
     visited_cells[(get_pos_x(), get_pos_y())] = get_entity_type()
@@ -190,6 +200,9 @@ def backtrack_one_step():
 
 def navigate_maze():
     global treasure_not_yet_found
+    
+    clear()
+    reset_state()
 
     plant_maze()
     record_current_cell_visited()
