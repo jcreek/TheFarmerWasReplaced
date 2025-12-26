@@ -73,5 +73,5 @@ def harvest_sunflowers(sunflowers):
         handle_initial_planting(sunflowers)
         initial_planting_performed = True
 
-    for _ in range(1000):
+    for _ in range(100000):
         find_sunflower_with_most_petals_and_harvest(sunflowers)
