@@ -5,6 +5,7 @@ import pumpkins
 import sunflowers
 import cacti
 import mazes
+import dinosaurs
 
 sunflowers_array = {} # sunflowers_array[(x, y)] = petals
 
@@ -22,11 +23,12 @@ def harvest_sunflowers_wrapper():
     sunflowers.harvest_sunflowers(sunflowers_array)
 
 while True:
-    run_loop(num_loops, 'hay', hay.harvest_hay_with_multiple_drones)
-    run_loop(num_loops, 'wood', wood.harvest_wood)
+    run_loop(num_loops * 20, 'hay', hay.harvest_hay_with_multiple_drones)
+    # run_loop(num_loops, 'wood', wood.harvest_wood)
     run_loop(num_loops * 20, 'carrots', carrots.harvest_carrots_with_multiple_drones)
     run_loop(num_loops, 'pumpkins', pumpkins.harvest_pumpkins_with_multiple_drones)
     sunflowers.initial_planting_performed = False
     run_loop(1, 'sunflowers', harvest_sunflowers_wrapper)
     run_loop(1, 'cacti', cacti.harvest_cacti_with_multiple_drones)
-    run_loop(10, "maze", mazes.navigate_maze)
+    run_loop(num_loops, "maze", mazes.navigate_maze)
+    run_loop(1, "dinosaur", dinosaurs.process)
